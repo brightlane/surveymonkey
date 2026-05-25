@@ -1,0 +1,62 @@
+name: Daily Articles Workflow
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs automatically every single day at midnight
+  workflow_dispatch:      # Allows you to trigger it manually from your GitHub Actions dashboard
+
+permissions:
+  contents: write
+
+jobs:
+  generate_and_publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Ecosystem
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Generation Tools
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Programmatic Generation Loop
+        shell: bash
+        run: |
+          echo "Compiling directories and creating daily informational blog layouts..."
+          python build.py
+
+      - name: Rotate Blog Content Topic Stack
+        shell: bash
+        run: |
+          # Rotates topics so the same topic isn't duplicated tomorrow
+          if [ -f blog_topics.txt ]; then
+            tail -n +2 blog_topics.txt > temp.txt && mv temp.txt blog_topics.txt
+            echo "Successfully shifted blog topics stack queue forward."
+          fi
+
+      - name: Deploy Secure Content Commit
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # SURGICAL TRACKING PROTECTION: Adds only your content outputs, preventing node_modules bloating
+          if [ -d pages ]; then git add pages/*.html; fi
+          if [ -d blog ]; then git add blog/*.html; fi
+          git add sitemap.xml
+          git add blog_topics.txt 2>/dev/null || echo "No topic file changes detected"
+
+          if git diff --cached --quiet; then
+            echo "No structural content updates detected."
+            exit 0
+          fi
+
+          git commit -m "Automated Content Sync [pSEO Directory & Blog]"
+          git push origin main
