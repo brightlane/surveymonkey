@@ -50,7 +50,7 @@ def generate_page_html(keyword, slug):
         .logo span {{ color: var(--primary); }}
         .container {{ max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }}
         .hero {{ padding: 5rem 0 4rem; text-align: center; background: linear-gradient(180deg, #F0FDF4 0%, #FFF 100%); }}
-        h1 {{ font-size: 3rem; font-weight: 800; tracking: -0.02em; margin-bottom: 1.5rem; }}
+        h1 {{ font-size: 3rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1.5rem; }}
         .hero p {{ font-size: 1.25rem; color: var(--muted); max-width: 700px; margin: 0 auto 2.5rem; }}
         .btn {{ display: inline-block; background: var(--primary); color: white; padding: 1rem 2.25rem; font-weight: 600; text-decoration: none; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,191,111,0.2); }}
         .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin: 4rem 0; text-align: left; }}
@@ -132,10 +132,9 @@ def generate_page_html(keyword, slug):
 </html>"""
 
 def generate_blog_html(title, slug, random_internal_landing=None):
-    """Generates an unique informational article with randomized structural phrasing matrix to block duplication penalties."""
+    """Generates a unique informational article with randomized structural phrasing matrix to block duplication penalties."""
     today_str = datetime.now().strftime("%B %d, %Y")
     
-    # Text asset matrix pools to randomize copy architecture across different daily generations
     intros = [
         f"Optimizing metrics for modern workflows requires a distinct strategy. Exploring how to build {title} establishes clear paths toward actionable insights.",
         f"When scaling modern organizational feedback, tracking issues related to {title} remains critical. Deploying clear testing structures ensures higher structural data integrity.",
@@ -217,6 +216,7 @@ def build_unified_sitemap(pages, posts):
         ET.SubElement(u, "priority").text = "0.8"
 
     for b in posts:
+        u = ET.SubElement(urlset, "urlset")  # Fallback map element
         u = ET.SubElement(urlset, "url")
         ET.SubElement(u, "loc").text = f"{BASE_URL}/blog/{b}"
         ET.SubElement(u, "changefreq").text = "daily"
